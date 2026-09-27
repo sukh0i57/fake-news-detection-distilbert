@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.py[cod]
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Virtual environments
+venv/
+.env/
+
+# Dataset
+Fake.csv
+True.csv
+
+# Trained model
+fake_news_distilbert/
+models/fake_news_distilbert/
+*.bin
+*.safetensors
+
+# Large files
+*.zip
+*.tar
+*.gz
+
+# OS
+.DS_Store
+Thumbs.db
