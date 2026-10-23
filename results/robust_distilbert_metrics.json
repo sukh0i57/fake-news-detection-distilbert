@@ -1,0 +1,23 @@
+{
+    "model": "Robust DistilBERT",
+    "validation_articles": 7727,
+    "accuracy": 0.9992235020059531,
+    "weighted_precision": 0.9992241214695003,
+    "weighted_recall": 0.9992235020059531,
+    "weighted_f1": 0.9992235414462688,
+    "confusion_matrix": [
+        [
+            4236,
+            5
+        ],
+        [
+            1,
+            3485
+        ]
+    ],
+    "training_epochs": 2,
+    "batch_size": 16,
+    "learning_rate": 2e-05,
+    "max_length": 256,
+    "best_validation_f1_during_training": 0.9991399082568807
+}

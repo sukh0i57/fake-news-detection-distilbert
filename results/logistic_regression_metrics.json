@@ -1,0 +1,18 @@
+{
+    "model": "TF-IDF + Logistic Regression",
+    "validation_articles": 7727,
+    "accuracy": 0.9831758767956517,
+    "weighted_precision": 0.9832253943511504,
+    "weighted_recall": 0.9831758767956517,
+    "weighted_f1": 0.9831653815378976,
+    "confusion_matrix": [
+        [
+            4199,
+            42
+        ],
+        [
+            88,
+            3398
+        ]
+    ]
+}

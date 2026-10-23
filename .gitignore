@@ -27,3 +27,20 @@ models/fake_news_distilbert/
 # OS
 .DS_Store
 Thumbs.db
+# Additional local data and model checkpoints
+/content/
+checkpoints/
+checkpoint-*/
+*.pt
+*.pth
+*.ckpt
+*.onnx
+*.h5
+*.keras
+
+# Local environment secrets
+.env.*
+!.env.example
+
+# Local datasets and temporary results
+data/

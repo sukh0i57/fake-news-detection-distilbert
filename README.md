@@ -19,6 +19,78 @@ The trained DistilBERT model can also be used through an interactive **Gradio in
 
 ---
 
+
+## Phase 1: Robustness and Reliable Evaluation
+
+Completed on October 23, 2026.
+
+This phase investigates potential near-duplicate overlap in the original
+random split and evaluates a freshly fine-tuned DistilBERT model using a
+similarity-aware grouped split.
+
+### Dataset and split
+
+| Item | Result |
+|---|---:|
+| Articles after exact-text deduplication | 38,646 |
+| Robust training articles | 30,919 |
+| Robust validation articles | 7,727 |
+| Similarity threshold used to construct groups | 0.95 |
+| Maximum neighbors considered per article during grouping | 10 |
+
+The grouping procedure used normalized text, TF-IDF features, nearest
+neighbors, and connected components. The top-10-neighbor limit means this
+is an approximate similarity-aware split, not a guarantee that every
+similar article was detected.
+
+A post-split audit found 31 validation articles with maximum training
+similarity >= 0.90 and none >= 0.95 under the audit configuration.
+
+### Model comparison on the same validation split
+
+| Model | Accuracy | Weighted Precision | Weighted Recall | Weighted F1 |
+|---|---:|---:|---:|---:|
+| TF-IDF + Logistic Regression | 98.32% | 98.32% | 98.32% | 98.32% |
+| Robust DistilBERT | 99.92% | 99.92% | 99.92% | 99.92% |
+
+The robust DistilBERT model was initialized from `distilbert-base-uncased`
+and fine-tuned for two epochs with a learning rate of 2e-5, batch size 16,
+and maximum sequence length of 256 tokens.
+
+### Robust DistilBERT confusion matrix
+
+Rows are actual labels; columns are predicted labels.
+
+| Actual Class | Predicted REAL | Predicted FAKE |
+|---|---:|---:|
+| REAL | 4,236 | 5 |
+| FAKE | 1 | 3,485 |
+
+Six of the 7,727 validation articles were misclassified.
+
+### Interpretation and limitations
+
+These results are measured on this validation split and do not establish
+real-world fact-checking accuracy. Similarity-aware grouping reduces some
+observed overlap but does not guarantee independence across publishers,
+events, topics, or writing styles. External-dataset evaluation is still
+required.
+
+The model classifies text patterns associated with dataset labels. It does
+not independently verify claims against trustworthy external evidence.
+
+### Phase 1 result files
+
+- `results/robust_distilbert_metrics.json`
+- `results/logistic_regression_metrics.json`
+- `results/model_comparison.csv`
+- `results/training_history.csv`
+
+The upgraded training notebook is
+`notebooks/Fake_News_Detection_Robustness_Upgrade.ipynb`.
+
+---
+
 ## 🎯 Objectives
 
 - Build a fake news classification system using NLP.
@@ -179,14 +251,15 @@ Stratification preserves approximately the same class distribution in both subse
 
 ## 📈 Results
 
-The following metrics were reported for the experimental validation split.
+The following table distinguishes the original random-split experiment from the updated similarity-aware evaluation.
 
-| Model | Accuracy | Precision | Recall | F1-Score |
-|---|---:|---:|---:|---:|
-| TF-IDF + Logistic Regression | 98.51% | 98.90% | 97.79% | 98.34% |
-| **DistilBERT** | **99.94%** | **99.86%** | **100.00%** | **99.93%** |
+| Model / experiment | Accuracy | Weighted F1 |
+|---|---:|---:|
+| Original TF-IDF + Logistic Regression (original random split) | 98.51% | 98.34% |
+| Robust TF-IDF + Logistic Regression (similarity-aware split) | 98.32% | 98.32% |
+| **Robust DistilBERT (similarity-aware split)** | **99.92%** | **99.92%** |
 
-On this validation split, DistilBERT achieved higher reported accuracy, precision, recall, and F1-score than the TF-IDF + Logistic Regression baseline.
+On the updated similarity-aware validation split, Robust DistilBERT outperformed the TF-IDF + Logistic Regression baseline on the reported accuracy and weighted F1 metrics.
 
 > **Important:** These results represent performance on the experimental validation split, not proven real-world accuracy. Near-duplicate overlap may have inflated the scores.
 
@@ -194,21 +267,10 @@ On this validation split, DistilBERT achieved higher reported accuracy, precisio
 
 ## 🔲 DistilBERT Confusion Matrix
 
-Reported confusion matrix:
-
-| Actual Class | Predicted REAL | Predicted FAKE |
-|---|---:|---:|
-| REAL | 4,234 | 5 |
-| FAKE | 0 | 3,491 |
-
-### Interpretation
-
-- **4,234** REAL articles were correctly classified.
-- **5** REAL articles were incorrectly classified as FAKE.
-- **0** FAKE articles were incorrectly classified as REAL.
-- **3,491** FAKE articles were correctly classified.
-
-The matrix contains 7,730 validation examples, consistent with the reported validation-set size.
+The original model's confusion matrix is historical and belongs to its
+original random validation split. The updated robust model's confusion
+matrix is reported in the Phase 1 section above and saved in
+`results/robust_distilbert_metrics.json`.
 
 ---
 
@@ -242,9 +304,9 @@ The reported audit results were:
 
 The audit indicated potential near-duplicate overlap between training and validation data. Highly similar articles can share vocabulary, wording, and even labels, making classification easier than it would be on genuinely unseen news.
 
-A similarity-aware retraining experiment was planned but could not be completed because GPU access became unavailable during the experiment.
+A similarity-aware retraining experiment has now been completed. See the Phase 1 section above for its methodology and results.
 
-Consequently, the reported **99.94% validation accuracy must be interpreted in the context of this particular split**. A similarity-aware split and evaluation on an independent dataset are needed to assess generalization more reliably.
+The original **99.94% validation accuracy belongs to the original random split**. The updated robust-split result is reported separately above. Both are dataset-specific validation results; evaluation on independent external news is still needed to assess generalization.
 
 ---
 
@@ -383,7 +445,7 @@ The application requires the trained model and tokenizer files to be available a
 
 ## 🔮 Future Improvements
 
-- Perform similarity-aware dataset splitting and retrain the model.
+- Evaluate on additional independent external datasets.
 - Evaluate on an independent external news dataset.
 - Use a larger and more diverse news corpus.
 - Investigate probability calibration.
